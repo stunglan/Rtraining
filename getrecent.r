@@ -31,9 +31,9 @@ toHour <- function(x) {
 
 getData <- function() {
 #  unlink(filename) # comment after first read
-  page.nr = 1 # start page
-  page.nrend = 1000000 # end page plays*100 581-589
-  after_utc= = "from=1409303671" # get only artists after this timestamp
+  page.nr <- 1 # start page
+  page.nrend <- 1000000 # end page plays*100 581-589
+  after_utc <- "from=1409309253" # get only artists after this timestamp
   
   uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&%s&limit=100&page=%s&format=json"
   repeat{
@@ -69,8 +69,10 @@ getData <- function() {
       
       write.table(data,file = filename ,append=TRUE,row.names=FALSE,col.names = FALSE)
       
-      
-      page.nr <- page.nr +1
+      if (length(page[[1]]) < 100) # last page
+        page.nr <- page.nrend + 1
+      else 
+        page.nr <- page.nr +1
       Sys.sleep(0.3) # limit on how many reads
     }
     
