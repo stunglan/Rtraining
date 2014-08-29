@@ -31,16 +31,18 @@ toHour <- function(x) {
 
 getData <- function() {
 #  unlink(filename) # comment after first read
-  page.nr = 349 # start page
+  page.nr = 1 # start page
+  page.nrend = 1000000 # end page plays*100 581-589
+  after_utc= = "from=1409303671" # get only artists after this timestamp
   
-  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&limit=100&page=%s&format=json"
+  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&%s&limit=100&page=%s&format=json"
   repeat{
     data <- NULL
-    uri.cooked <- sprintf(uri.raw,mykey,page.nr)
+    uri.cooked <- sprintf(uri.raw,after_utc,mykey,page.nr)
     json <- getURL(uri.cooked)
     page <- fromJSON(json)
     
-    if (is.numeric(page[[1]]) | page.nr > 1000000) {
+    if (is.numeric(page[[1]]) | page.nr > page.nrend) {
       if (is.numeric(page[[1]]))
         print(page)
       break
