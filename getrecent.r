@@ -1,11 +1,10 @@
-
+# read data into a local data file
 library(rjson)
 library(RCurl)
 library(plyr)
-library(ggplot2)
 
 source("localconfig.R")
-
+filename <- "data/recentplays.csv"
 
 toDate <- function(x) {
   date <- as.numeric(x)
@@ -24,24 +23,26 @@ toDay <- function(x) {
   y <- toDate(x)
   format(y, format = "%Y-%m-%d")
 }
-toTime <- function(x) {
+toHour <- function(x) {
   y <- toDate(x)
-  format(y, format = "%H-%M-%S")
+  format(y, format = "%Y-%m-%d %H")
 }
 
 
 getData <- function() {
-  data <- NULL
-  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&u%s&limit=100&page=%s&format=json"
-  page.nr = 1
+#  unlink(filename) # comment after first read
+  page.nr = 349 # start page
+  
+  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&limit=100&page=%s&format=json"
   repeat{
+    data <- NULL
     uri.cooked <- sprintf(uri.raw,mykey,page.nr)
     json <- getURL(uri.cooked)
     page <- fromJSON(json)
     
-    if (is.numeric(page[[1]]) | page.nr > 10) {
+    if (is.numeric(page[[1]]) | page.nr > 1000000) {
       if (is.numeric(page[[1]]))
-        page[[1]]
+        print(page)
       break
     }
     else
@@ -51,53 +52,42 @@ getData <- function() {
       page.songs <- data.frame(page.songs)
       
       data <- rbind(data,page.songs)
+      
+      names(data) <- c("name","album","artist","uts")
+      data[1] <- unlist(data[1])
+      data[2] <- unlist(data[2])
+      data[3] <- unlist(data[3])
+      data[4] <- unlist(data[4])
+      data <- transform(data,
+                        year = toYear(uts),
+                        month = toMonth(uts),
+                        day = toDay(uts),
+                        hour = toHour(uts)
+      )
+      
+      write.table(data,file = filename ,append=TRUE,row.names=FALSE,col.names = FALSE)
+      
+      
       page.nr <- page.nr +1
+      Sys.sleep(0.3) # limit on how many reads
     }
     
+
+    
   } # repeat
-  names(data) <- c("name","album","artist","uts")
-  data
+  
+  page.nr
+
+
+
 }
 
 data <- getData()
 
 
-if (is.null(data)) {
-  "No data"
-  quit()
-}
 
 
 
 
 
 
-data[1] <- unlist(data[1])
-data[2] <- unlist(data[2])
-data[3] <- unlist(data[3])
-data[4] <- unlist(data[4])
-data <- transform(data,
-                  year = toYear(uts),
-                  month = toMonth(uts),
-                  day = toDay(uts)
-)
-
-count(data,"name")
-count(data,c("name","day"))
-data.perday <- count(data,"day")
-
-qplot(day,freq,data = data.perday)
-
-#-------
-
-data.perday <- ddply(bnames, c("day"), transform, 
-                rank = rank(-percent, ties.method = "first"))
-
-View(songs)
-
-Sys.time()
-help.search("date time")
-(now <- as.POSIXlt(Sys.time()))
-t <- as.numeric("1409209057")
-(d <- as.POSIXlt(t,origin = "1970-01-01"))
-d$year

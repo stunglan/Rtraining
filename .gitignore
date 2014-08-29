@@ -12,3 +12,6 @@ localconfig.R
 
 #emacs
 *~
+
+#omit data files
+data/**
