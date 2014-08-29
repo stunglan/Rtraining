@@ -8,7 +8,7 @@
 .Rdata
 
 # config file
-*.localconfig
+localconfig.R
 
 #emacs
 *~
