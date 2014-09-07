@@ -3,6 +3,7 @@ library(rjson)
 library(RCurl)
 library(plyr)
 
+setwd("~/GitHub/Rtraining")
 source("localconfig.R")
 filename <- "data/recentplays.csv"
 
@@ -35,10 +36,10 @@ getData <- function() {
   page.nrend <- 1000000 # end page plays*100 581-589
   after_utc <- "from=1409309877" # get only artists after this timestamp
   
-  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&%s&limit=100&page=%s&format=json"
+  uri.raw <- "http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&%s&%s&%s&limit=100&page=%s&format=json"
   repeat{
     data <- NULL
-    uri.cooked <- sprintf(uri.raw,after_utc,mykey,page.nr)
+    uri.cooked <- sprintf(uri.raw,after_utc,myuser,mykey,page.nr)
     json <- getURL(uri.cooked)
     page <- fromJSON(json)
     
@@ -85,6 +86,8 @@ getData <- function() {
 
 
 }
+
+
 
 data <- getData()
 "Data imported"
