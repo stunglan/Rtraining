@@ -9,21 +9,21 @@ library(wordcloud)
 
 setwd("~/GitHub/Rtraining")
 
-# the corpus way
 
-myCorpus <- Corpus(DirSource("data"),list(reader=readPDF))
-myCorpus <- tm_map(myCorpus,tolower)
 
-print(myCorpus)
-inspect(myCorpus[1:4])
+library(wordcloud)
+library(RColorBrewer)
 
-dtm <- DocumentTermMatrix(myCorpus)
-m <- as.matrix(dtm)
-v <- sort(colSums(m),decreasing=TRUE)
-head(v,14)
-words <- names(v)
-d <- data.frame(word=words, freq=v)
+d <- read.table("data/words.csv",
+                          header = TRUE,
+                          sep = ",")
 
-wordcloud(d$word,d$freq,min.freq=50)
+png("dnc.png")
+wordcloud(d$words, # words
+          d$freq, # frequencies
+          scale = c(3,1), # size of largest and smallest words
+          colors = brewer.pal(9,"Blues") # number of colors, palette
+          ) # proportion of words to rotate 90 degrees
+dev.off()
 
-wordcloud(words, scale=c(5,0.5), max.words=100, random.order=FALSE, rot.per=0.35, use.r.layout=FALSE)
+wordcloud(d$words,d$freq, scale=c(5,0.5), max.words=100, random.order=FALSE, rot.per=0.35, use.r.layout=FALSE)
